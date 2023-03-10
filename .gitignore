@@ -1,4 +1,9 @@
 .idea/
 node_modules/
 package-lock.json
-workspace.xml
+
+.idea/workspace.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/project_node.iml
+.idea/vcs.xml
