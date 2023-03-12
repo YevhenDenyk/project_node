@@ -1,5 +1,5 @@
 const express = require('express');
-const dataUsers = require('./dataBase/data')
+const {fileServices} = require('./services');
 
 const app = express();
 
@@ -10,66 +10,107 @@ app.listen(5000, () => {
     console.log('Server listen 5000')
 })
 
+
 app.get('/', (req, res) => {
     console.log("welcome")
 })
 
-app.get('/users', (req, res) => {
-    res.json(dataUsers)
-})
+app.get('/users', async (req, res) => {
 
-app.get('/users/:userId', (req, res) => {
-    const {userId} = req.params
-    const length = dataUsers.length
+    const users = await fileServices.reader()
 
-    if (0 <= +userId && +userId <= length-1) {
-        res.json(dataUsers[userId])
-    } else {
-        res.json('User not found')
-    }
+    res.json(users)
+});
 
-})
-
-app.post('/users', (req, res) => {
+app.post('/users', async (req, res) => {
     const user = req.body;
-    console.log(user);
 
-    if (user.name && user.age) {
-        dataUsers.push(user);
-        res.status(201).json("create");
-    } else {
-        res.json("bed request")
+    if (user.age < 0 || user.age > 120 || typeof user.age !== "number") {
+        return res.status(400).json('Bad request, age incorrect')
     }
-})
+    if (user.name.length < 2 || typeof user.name !== "string" ) {
+        return res.status(400).json('Bad request, name incorrect')
+    }
 
-app.put('/users/:userId', (req, res) => {
+    const users = await fileServices.reader()
+
+    //шукаю максимальне ІД в масиві
+    let maxID = users[0].id
+    for (const findID of users) {
+        if (findID.id > maxID) {
+            maxID = findID.id
+        }
+    }
+
+    //записуємо нового юзера до масиву
+    const newUser = {id: maxID + 1, name: user.name, age: user.age}
+    users.push(newUser)
+
+    await fileServices.writer(users)
+
+    res.status(201).json(newUser);
+});
+
+app.get('/users/:userId', async (req, res) => {
+    const {userId} = req.params
+
+    const users = await fileServices.reader();
+
+    const user = users.find(u => u.id === +userId);
+
+    if (!user) {
+        return res.status(404).json('User not found')
+    }
+
+    res.json(user)
+});
+
+
+app.put('/users/:userId', async (req, res) => {
     const {userId} = req.params;
     const updateUser = req.body;
-    const length = dataUsers.length
 
-    if (0 <= +userId && +userId <= length-1) {
-
-        if (updateUser.name && updateUser.age) {
-
-            dataUsers[userId] = updateUser;
-            res.json('update')
-
-        } else {
-            res.json("bed request")
-        }
-    } else {
-        res.json('User not found')
+    if (updateUser.age < 0 || updateUser.age > 120 || typeof updateUser.age !== "number") {
+        return res.status(400).json('Bad request, age incorrect')
     }
-})
+    if (updateUser.name.length < 2 || typeof updateUser.name !== "string" ) {
+        return res.status(400).json('Bad request, name incorrect')
+    }
 
-app.delete('/users/:userId', (req, res) => {
+
+    const users = await fileServices.reader();
+
+    const index = users.findIndex(user => user.id === +userId);
+
+    if (index === -1) {
+        return res.status(404).json('User not found')
+    }
+    users[index] = {...users[index], ...updateUser};
+    // users[index] = {
+    //     id: users[index].id,
+    //     name: updateUser.name,
+    //     age: updateUser.age
+    // };
+
+    await fileServices.writer(users);
+
+    res.status(201).json(users[index]);
+
+});
+
+app.delete('/users/:userId', async (req, res) => {
     const {userId} = req.params;
-    const length = dataUsers.length
 
-    if (0 <= +userId && +userId <= length-1) {
-        dataUsers.splice(userId, 1)
-        res.json('delete')
-    } else {
-        res.json('User not found')
+    const users = await fileServices.reader()
+
+    const index = users.findIndex(user => user.id === +userId);
+
+    if (index === -1) {
+        return res.status(404).json('User not found')
     }
-})
+
+    users.splice(index, 1)
+    await fileServices.writer(users)
+
+    res.sendStatus(204)
+});
