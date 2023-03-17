@@ -6,7 +6,6 @@ module.exports = {
             const users = await fileServices.reader();
 
             res.json(users);
-            next();
         }catch (e) {
             next (e)
         }
@@ -14,7 +13,7 @@ module.exports = {
 
     createUser: async (req, res, next) => {
         try {
-            const user = req.user
+            const user = req.body
 
             const users = await fileServices.reader()
 
@@ -31,7 +30,6 @@ module.exports = {
             await fileServices.writer(users)
 
             res.status(201).json(newUser);
-            next()
         }catch (e) {
             next (e)
         }
@@ -41,25 +39,21 @@ module.exports = {
             const user = req.user
 
             res.json(user)
-            next()
         }catch (e) {
             next (e)
         }
     },
     updateUser: async (req, res, next) => {
         try {
-            const user = req.user
-            const users = req.users
-            const updateUser = req.updateUser;
+            const {user,users, body} = req
 
             const index = users.findIndex((u) => u.id === user.id);
 
-            users[index] = {...users[index], ...updateUser};
+            users[index] = {...users[index], ...body};
 
             await fileServices.writer(users);
 
             res.status(201).json(users[index]);
-            next()
 
         }catch (e) {
             next (e)
@@ -67,16 +61,15 @@ module.exports = {
     },
     deleteUser:async (req, res, next) => {
         try {
-            const user = req.user
-            const users = req.users
+            const {user,users} = req
 
             const index = users.findIndex(u => u.id === user.id);
-
             users.splice(index, 1)
+
             await fileServices.writer(users)
 
             res.sendStatus(204)
-            next()
+
         }catch (e) {
             next (e)
         }

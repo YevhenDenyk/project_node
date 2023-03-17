@@ -22,36 +22,47 @@ module.exports={
             next(e)
         }
     },
-    checkDataUserUpdated: (req, res, next) => {
+    checkDataCreateUser: (req, res, next) => {
         try {
-            const updateUser = req.body;
+            const {age, name} = req.body;
 
-            if (updateUser.age < 0 || updateUser.age > 120 || typeof updateUser.age !== "number") {
+            if (!age || age < 0 || age > 120 || typeof age !== "number") {
                 throw new ApiError('Bad request, age incorrect', 400)
             }
-            if (updateUser.name.length < 2 || typeof updateUser.name !== "string") {
+            if (!name || name.length < 2 || typeof name !== "string") {
                 throw new ApiError('Bad request, name incorrect', 400)
             }
 
-            req.updateUser = updateUser;
             next()
 
         } catch (e) {
             next(e)
         }
     },
-    checkDataCreateUser: (req, res, next) => {
+    checkDataUserUpdated: (req, res, next) => {
         try {
-            const user = req.body;
+            const {age, name} = req.body;
 
-            if (user.age < 0 || user.age > 120 || typeof user.age !== "number") {
+            if (age && (age < 0 || age > 120 || typeof age !== "number")) {
                 throw new ApiError('Bad request, age incorrect', 400)
             }
-            if (user.name.length < 2 || typeof user.name !== "string") {
+            if (name && (name.length < 2 || typeof name !== "string")) {
                 throw new ApiError('Bad request, name incorrect', 400)
             }
 
-            req.user = user
+            next()
+        }catch (e) {
+            next (e)
+        }
+    },
+    isIdValid: (req, res, next) => {
+        try {
+            const {userId} = req.params
+
+            if (userId < 0 || Number.isNaN(+userId)) {
+                throw new ApiError('Not valid ID', 400);
+            }
+
             next()
         }catch (e) {
             next (e)
