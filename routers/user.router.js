@@ -1,34 +1,17 @@
 const router = require('express').Router();
 
-const middleware = require('../middlewares/user.middleware')
-const controller = require('../controllers/user.controller')
+const controller = require('../controllers/users.controller');
+const middleware = require('../middlewares/users.middleware');
 
-router.get('/', controller.getAllUser)
-router.post(
-    '/',
-    middleware.isBodyValidCreate,
-    controller.createUser
-)
+router.get('/', controller.getAllUsers);
 
-router.get(
-    '/:userID',
-    middleware.isParamsValid,
-    middleware.checkIsUserExist,
-    controller.getUserById
-)
-router.put(
-    '/:userID',
-    middleware.isParamsValid,
-    middleware.checkIsUserExist,
-    middleware.isBodyValidUpdate,
-    controller.updateUser
-)
-router.delete(
-    '/:userID',
-    middleware.isParamsValid,
-    middleware.checkIsUserExist,
-    controller.deleteUser
-)
+router.post('/', middleware.isBodyCreateValid, controller.createUser);
+
+router.get('/:userID', middleware.isParamsValid, middleware.isUserExist, controller.getUserById);
+
+router.put('/:userID', middleware.isParamsValid, middleware.isBodyUpdateValid, middleware.isUserExist, controller.updateUser);
+
+router.delete('/:userID', middleware.isParamsValid, middleware.isUserExist, controller.deleteUser);
 
 
 module.exports = router
