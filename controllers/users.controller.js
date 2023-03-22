@@ -1,34 +1,18 @@
-const {fileService} = require('../services/index');
-const {json} = require("express");
+const {userService} = require("../services");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
         try {
-            const users = await fileService.readerFile()
-            res.json(users)
+            const users = await userService.findByParams();
+            res.json(users);
         } catch (e) {
-            next(e)
+            next(e);
         }
     },
     createUser: async (req, res, next) => {
         try {
-            const {age, name} = req.body
-            const users = await fileService.readerFile()
-
-            let maxID = users[0].id
-            for (const user of users) {
-                if (user.id > maxID) {
-                    maxID = user.id
-                }
-            }
-
-            const newUser = {id: maxID + 1, name, age}
-
-            users.push(newUser)
-
-            await fileService.writerFile(users);
+            const newUser = await userService.create(req.body);
             res.status(201).json(newUser)
-
         } catch (e) {
             next(e)
         }
@@ -42,27 +26,20 @@ module.exports = {
     },
     updateUser: async (req, res, next) => {
         try {
-            const {user, users, body} = req
+            const {userID} = req.params
 
-            const index = users.findIndex(u => u.id === user.id);
-            Object.assign(users[index], body)
-            // users[index] = {...users[index], ...body}
+            const user = await userService.updateOne(userID, req.body);
 
-            await fileService.writerFile(users)
-
-            res.status(201).json('User updated')
+            res.status(201).json( user)
         } catch (e) {
             next(e)
         }
     },
     deleteUser: async (req, res, next) => {
         try {
-            const {user, users} = req
+            const {userID} = req.params
 
-            const index = users.findIndex(u => u.id === user.id);
-
-            users.splice(index,1)
-            await fileService.writerFile(users)
+            await userService.deleteById(userID)
 
             res.sendStatus(204)
 

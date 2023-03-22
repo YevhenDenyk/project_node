@@ -1,5 +1,6 @@
 const express = require('express');
 require('dotenv').config()
+const mongoose = require('mongoose');
 
 const config = require('./configs/config');
 const usersRouter = require('./routers/user.router');
@@ -19,10 +20,11 @@ app.use((err, req, res, next) => {
 })
 
 app.get('/', (req, res) => {
-    console.log("Welcome to hell)")
+    console.log("Welcome)")
     res.json('Hello!')
 })
 
-app.listen(config.PORT, () => {
+app.listen(config.PORT, async () => {
+    await mongoose.connect('mongodb://0.0.0.0:27017/users');
     console.log(`Server listen port ${config.PORT}`)
 })
