@@ -1,11 +1,11 @@
-const User = require('../data/User');
+const User = require('../dataBase/User');
 
 module.exports = {
     findByParams: async (filter = {}) => {
         return User.find(filter);
     },
     findOne: async (filter) => {
-        return User.findOne(filter);
+        return User.findOne(filter).populate('car');
     },
     updateOne: async (userId, newInfo) => {
         return User.findByIdAndUpdate(userId, newInfo, {new : true})

@@ -1,27 +1,27 @@
 const ApiError = require("../error/apiError");
 const {userService} = require("../services");
-const {userNormalizator} = require("../helper");
+const {userNormalizer} = require("../helper");
 
 module.exports = {
-    isParamsValid: async (req, res, next) => {
-        try {
-            const {userID} = req.params
-
-            if (userID < 0 || typeof +userID !== "number") {
-                throw new ApiError('User ID in params no valid', 400)
-            }
-
-            next()
-        } catch (e) {
-            next(e)
-        }
-    },
+    // isParamsValid: async (req, res, next) => {
+    //     try {
+    //         const {userID} = req.params
+    //
+    //         if (userID < 0 || typeof +userID !== "number") {
+    //             throw new ApiError('User ID in params no valid', 400)
+    //         }
+    //
+    //         next()
+    //     } catch (e) {
+    //         next(e)
+    //     }
+    // },
     isUserExist: async (req, res, next) => {
         try {
             const {userID} = req.params;
 
             const user = await userService.findOne({_id: userID})
-            console.log(user)
+
             if (!user) {
                 throw new ApiError(`User with id: ${userID} not found`, 404);
             }
@@ -52,12 +52,16 @@ module.exports = {
             next(e)
         }
     },
-    userNormalizator: async (req, res, next) => {
+    userNormalizer: async (req, res, next) => {
         try {
            let { name, email} = req.body
 
-           if(name) req.body.name = userNormalizator.name(name);
-           if (email) req.body.email = email.toLowerCase();
+           if(name) {
+               req.body.name = userNormalizator.name(name)
+           }
+           if (email) {
+               req.body.email = email.toLowerCase()
+           }
 
             next()
         } catch (e) {
