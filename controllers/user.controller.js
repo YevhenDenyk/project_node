@@ -1,9 +1,9 @@
-const {fileServices} = require("../services");
+const {userServices} = require("../services");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
         try {
-            const users = await fileServices.reader();
+            const users = await userServices.findByParams();
 
             res.json(users);
         }catch (e) {
@@ -13,23 +13,9 @@ module.exports = {
 
     createUser: async (req, res, next) => {
         try {
-            const user = req.body
+            const user = await userServices.createOne(req.body)
 
-            const users = await fileServices.reader()
-
-            let maxID = users[0].id
-            for (const findID of users) {
-                if (findID.id > maxID) {
-                    maxID = findID.id
-                }
-            }
-
-            const newUser = {id: maxID + 1, name: user.name, age: user.age}
-            users.push(newUser)
-
-            await fileServices.writer(users)
-
-            res.status(201).json(newUser);
+            res.status(201).json(user);
         }catch (e) {
             next (e)
         }
@@ -45,15 +31,11 @@ module.exports = {
     },
     updateUser: async (req, res, next) => {
         try {
-            const {user,users, body} = req
+            const { body, params } = req
 
-            const index = users.findIndex((u) => u.id === user.id);
+           const user =  await userServices.findByIdAndUpdate(params.userId, body)
 
-            users[index] = {...users[index], ...body};
-
-            await fileServices.writer(users);
-
-            res.status(201).json(users[index]);
+            res.status(201).json(user);
 
         }catch (e) {
             next (e)
@@ -61,12 +43,9 @@ module.exports = {
     },
     deleteUser:async (req, res, next) => {
         try {
-            const {user,users} = req
+            const {userId} = req.params
 
-            const index = users.findIndex(u => u.id === user.id);
-            users.splice(index, 1)
-
-            await fileServices.writer(users)
+            await userServices.findByIdAndDelete(userId)
 
             res.sendStatus(204)
 
