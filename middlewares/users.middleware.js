@@ -1,86 +1,70 @@
 const ApiError = require("../error/apiError");
 const {userService} = require("../services");
 const {userNormalizer} = require("../helper");
+const {commonValidator, userValidator} = require("../validators");
+const User = require('../dataBase/User')
 
 module.exports = {
-    // isParamsValid: async (req, res, next) => {
-    //     try {
-    //         const {userID} = req.params
-    //
-    //         if (userID < 0 || typeof +userID !== "number") {
-    //             throw new ApiError('User ID in params no valid', 400)
-    //         }
-    //
-    //         next()
-    //     } catch (e) {
-    //         next(e)
-    //     }
-    // },
-    isUserExist: async (req, res, next) => {
+    getUserDynamically: (fieldName, from = 'body', dbField = fieldName) => async (req, res, next) => {
         try {
-            const {userID} = req.params;
+            const fieldToSearch = req[from][fieldName];
 
-            const user = await userService.findOne({_id: userID})
+            const user = await User.findOne({[dbField]: fieldToSearch})
 
             if (!user) {
-                throw new ApiError(`User with id: ${userID} not found`, 404);
+                throw new ApiError(`User not found`, 404);
             }
 
-            req.user = user;
-            next();
+            req.user = user
 
+            next();
         } catch (e) {
             next(e);
         }
     },
+    isUserIdValid: async (req, res, next) => {
+        try {
+            const {userId} = req.params
+
+            const validate = commonValidator.idValidator.validate(userId);
+
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
+            }
+
+            next()
+        } catch (e) {
+            next(e)
+        }
+    },
     isBodyCreateValid: async (req, res, next) => {
         try {
-            const {age, name, email} = req.body
+            const {body} = req
 
-            if (age < 0 || age > 120 || typeof age !== "number") {
-                throw new ApiError('Age no valid', 400)
+            const validate = userValidator.newUserValidators.validate(body);
+
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
             }
-            if (name.length < 3 || typeof name !== "string") {
-                throw new ApiError('Name no valid', 400)
-            }
-            if (!email || !email.includes('@')) {
-                throw new ApiError('Email no valid', 400)
-            }
+
+            req.body = validate.value
 
             next()
         } catch (e) {
             next(e)
         }
     },
-    userNormalizer: async (req, res, next) => {
-        try {
-           let { name, email} = req.body
 
-           if(name) {
-               req.body.name = userNormalizator.name(name)
-           }
-           if (email) {
-               req.body.email = email.toLowerCase()
-           }
-
-            next()
-        } catch (e) {
-            next(e)
-        }
-    },
     isBodyUpdateValid: async (req, res, next) => {
         try {
-            const {age, name, email} = req.body
 
-            if (age && (age < 0 || age > 120 || typeof age !== "number")) {
-                throw new ApiError('Age no valid', 400)
+            const validate = userValidator.editUseValidator.validate(req.body);
+
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
             }
-            if (name && (name.length < 3 || typeof name !== "string")) {
-                throw new ApiError('Name no valid', 400)
-            }
-            if (email &&  !email.includes('@')) {
-                throw new ApiError('Email no valid', 400)
-            }
+
+            req.body = validate.value
 
             next()
         } catch (e) {
@@ -106,5 +90,19 @@ module.exports = {
             next(e)
         }
 
+    },
+    userNormalizer: async (req, res, next) => {
+        try {
+
+            let {name} = req.body
+
+            if (name) {
+                req.body.name = userNormalizer.name(name)
+            }
+
+            next()
+        } catch (e) {
+            next(e)
+        }
     },
 }

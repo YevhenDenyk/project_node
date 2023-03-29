@@ -10,17 +10,20 @@ router.get(
 
 router.post(
     '/',
+    carMiddleware.isCarIdValid,
     carMiddleware.isBodyCreateValid,
     carsController.createCar
 );
 
 router.get(
     '/:carId',
+    carMiddleware.isCarIdValid,
     carMiddleware.isCarExist,
     carsController.getCarById
 );
 
 router.put('/:carId',
+    carMiddleware.isCarIdValid,
     carMiddleware.isBodyUpdateValid,
     carMiddleware.isCarExist,
     carsController.updateCar
@@ -28,6 +31,7 @@ router.put('/:carId',
 
 router.delete(
     '/:carId',
+    carMiddleware.isCarIdValid,
     carMiddleware.isCarExist,
     carsController.deleteCar
 );

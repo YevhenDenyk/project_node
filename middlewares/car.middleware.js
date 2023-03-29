@@ -1,59 +1,66 @@
 const ApiError = require("../error/apiError");
 const {carsService} = require("../services");
+const {carValidator, commonValidator} = require("../validators");
 
 module.exports = {
+    isCarIdValid: async (req, res, next) => {
+        try {
+            const validate = commonValidator.idValidator.validate(req.params.carId);
+
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400);
+            }
+
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
     isBodyCreateValid: async (req, res, next) => {
         try {
-            const {model, year, price} = req.body
 
-            if (!model || typeof model !== "string" || model.length < 3 || model.length > 15) {
-                throw new ApiError('Model invalid', 400)
-            }
-            if (!year || typeof year !== "number" || year < 1950 || year > new Date().getFullYear()) {
-                throw new ApiError('Year invalid', 400)
-            }
-            if (!price || typeof price !== "number" || price < 1 || price > 10000000) {
-                throw new ApiError('Price invalid', 400)
+            const validate = carValidator.newCarValidator.validate(req.body);
+
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400);
             }
 
-            next()
+            req.newCar = validate.value;
+
+            next();
         } catch (e) {
-            next(e)
+            next(e);
         }
     },
     isCarExist: async (req, res, next) => {
         try {
-            const {carId} = req.params
+            const {carId} = req.params;
 
-            const car = await carsService.findById(carId)
+            const car = await carsService.findById(carId);
 
             if (!car) {
-                throw new ApiError('Car not found', 400)
+                throw new ApiError('Car not found', 400);
             }
-            req.car = car
+            req.car = car;
 
-            next()
+            next();
         } catch (e) {
-            next(e)
+            next(e);
         }
     },
     isBodyUpdateValid: async (req, res, next) => {
         try {
-            const {model, year, price} = req.body
+            const validate = carValidator.newCarValidator.validate(req.body);
 
-            if (model && (!model || typeof model !== "string" || model.length < 3 || model.length > 15)) {
-                throw new ApiError('Model invalid', 400)
-            }
-            if (year && (!year || typeof year !== "number" || year < 1950 || year > new Date().getFullYear())) {
-                throw new ApiError('Year invalid', 400)
-            }
-            if (price && (!price || typeof price !== "number" || price < 1 || price > 10000000)) {
-                throw new ApiError('Price invalid', 400)
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400);
             }
 
-            next()
+            req.newCar = validate.value;
+
+            next();
         } catch (e) {
-            next(e)
+            next(e);
         }
     },
 }

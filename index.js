@@ -3,15 +3,16 @@ require('dotenv').config()
 const mongoose = require('mongoose');
 
 const config = require('./configs/config');
-const {usersRouter,carsRouter} = require('./routers');
+const {usersRouter,carsRouter,authRouter} = require('./routers');
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-app.use('/users', usersRouter);
+app.use('/auth', authRouter);
 app.use('/cars', carsRouter);
+app.use('/users', usersRouter);
 
 app.use((err, req, res, next) => {
     res.status(err.status || 500).json({

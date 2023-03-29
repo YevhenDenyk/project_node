@@ -1,3 +1,3 @@
 module.exports = {
-    userNormalizator: require('./user.normalizer')
+    userNormalizer: require('./user.normalizer')
 };

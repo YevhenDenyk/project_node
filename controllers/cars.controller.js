@@ -10,7 +10,7 @@ module.exports = {
     },
     createCar: async (req, res, next) => {
         try {
-            const newCar = await carsService.create(req.body)
+            const newCar = await carsService.create(req.newCar)
 
             res.status(201).json(newCar)
         } catch (e) {
@@ -29,7 +29,7 @@ module.exports = {
     updateCar: async (req, res, next) => {
         try {
 
-            const newCar = await carsService.updateOne(req.params.carId, req.body)
+            const newCar = await carsService.updateOne(req.params.carId, req.newCar)
 
             res.status(201).json(newCar)
 
