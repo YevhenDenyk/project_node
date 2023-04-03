@@ -1,16 +1,17 @@
 const {userServices} = require("../services");
 const ApiError = require("../errors/ApiError");
 const {userNormalizer} = require('../helper')
+const {commonValidator, userValidator} = require("../validators");
 
 module.exports = {
-    checkIsUserExist: async (req, res, next) => {
+    checkIsIdValid: async (req, res, next) => {
         try {
             const {userId} = req.params;
 
-            const user = await userServices.findById( userId)
+            const validate = commonValidator.idValidator.validate(userId);
 
-            if (!user) {
-                throw new ApiError('User not found', 404)
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
             }
 
             next()
@@ -19,11 +20,11 @@ module.exports = {
             next(e)
         }
     },
-    checkIsUserExistAndReturn: async (req, res, next) => {
+    getUserDynamically: (fieldName, from='body', dbField= fieldName)=>async (req, res, next) => {
         try {
-            const {userId} = req.params;
+            const fieldToSearch = req[from][fieldName];
 
-            const user = await userServices.findOne({_id: userId})
+            const user = await userServices.findOne({[dbField]: fieldToSearch})
 
             if (!user) {
                 throw new ApiError('User not found', 404)
@@ -36,39 +37,33 @@ module.exports = {
             next(e)
         }
     },
+
     checkDataCreateUser: (req, res, next) => {
         try {
-            const {age, name, email} = req.body;
 
-            if (!age || age < 0 || age > 120 || typeof age !== "number") {
-                throw new ApiError('Bad request, age incorrect', 400)
+            const validate = userValidator.createUserValidators.validate(req.body);
+
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
             }
-            if (!name || name.length < 2 || typeof name !== "string") {
-                throw new ApiError('Bad request, name incorrect', 400)
-            }
-            if (!email || !email.includes('@') || typeof email !== "string") {
-                throw new ApiError('Bad request, email incorrect', 400)
-            }
+
+            req.newUser = validate.value
 
             next()
-
         } catch (e) {
             next(e)
         }
     },
     checkDataUserUpdated: (req, res, next) => {
         try {
-            const {age, name, email} = req.body;
 
-            if (age && (age < 0 || age > 120 || typeof age !== "number")) {
-                throw new ApiError('Bad request, age incorrect', 400)
+            const validate = userValidator.editUserValidators.validate(req.body);
+
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
             }
-            if (name && (name.length < 2 || typeof name !== "string")) {
-                throw new ApiError('Bad request, name incorrect', 400)
-            }
-            if (email && (!email || !email.includes('@') || typeof email !== "string")) {
-                throw new ApiError('Bad request, email incorrect', 400)
-            }
+
+            req.newUser = validate.value
 
             next()
         } catch (e) {
@@ -77,7 +72,7 @@ module.exports = {
     },
     checkIsEmailExist:async (req, res, next) => {
         try {
-            const {email} = req.body
+            const {email} = req.newUser
 
             const user = await userServices.findOne({email: email})
 
@@ -92,11 +87,8 @@ module.exports = {
     },
     dataNormalizer: (req, res, next) => {
         try {
-            const {email, name} = req.body
+            const {name} = req.body
 
-            if (email) {
-                req.body.email = email.toLowerCase()
-            }
             if (name) {
                 req.body.name = userNormalizer.name(name)
             }

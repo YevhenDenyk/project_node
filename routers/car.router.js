@@ -15,17 +15,20 @@ router.post(
 
 router.get(
     '/:carId',
+    carMiddleware.validateCarId,
     carMiddleware.checkIsCarExistAndReturn,
     carController.getCarById
 );
 router.put(
     '/:carId',
+    carMiddleware.validateCarId,
     carMiddleware.checkIsCarExistAndReturn,
     carMiddleware.checkDataUpdateCar,
     carController.updateUser
 );
 router.delete(
     '/:carId',
+    carMiddleware.validateCarId,
     carMiddleware.checkIsCarExistAndReturn,
     carController.deleteUser
 );

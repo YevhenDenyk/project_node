@@ -1,7 +1,23 @@
 const {carServices} = require("../services");
 const ApiError = require("../errors/ApiError");
+const {commonValidator, carValidator} = require("../validators");
 
 module.exports = {
+    validateCarId: async (req, res, next) => {
+        try {
+            const {carId} = req.params;
+
+            const validate = commonValidator.idValidator.validate(carId);
+
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
+            }
+
+            next()
+        } catch (e) {
+            next(e)
+        }
+    },
     checkIsCarExistAndReturn: async (req, res, next) => {
         try {
             const {carId} = req.params;
@@ -21,16 +37,10 @@ module.exports = {
     },
     checkDataCreateCar: (req, res, next) => {
         try {
-            const {model, price, year} = req.body;
+            const validate = carValidator.createCarValidator.validate(req.body);
 
-            if (!model || model.length < 2 || typeof model !== "string") {
-                throw new ApiError('Bad request, model incorrect', 400)
-            }
-            if (!price || price < 0 || price > 9999999 || typeof price !== "number") {
-                throw new ApiError('Bad request, price incorrect', 400)
-            }
-            if (!year || year < 1990 || year > new Date().getFullYear() || typeof year !== "number") {
-                throw new ApiError('Bad request, year incorrect', 400)
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
             }
 
             next()
@@ -40,16 +50,10 @@ module.exports = {
     },
     checkDataUpdateCar: (req, res, next) => {
         try {
-            const {model, price, year} = req.body;
+            const validate = carValidator.updateCarValidator.validate(req.body);
 
-            if (model && (!model || model.length < 2 || typeof model !== "string")) {
-                throw new ApiError('Bad request, model incorrect', 400)
-            }
-            if (price && (!price || price < 0 || price > 9999999 || typeof price !== "number")) {
-                throw new ApiError('Bad request, price incorrect', 400)
-            }
-            if (year && (!year || year < 1990 || year > new Date().getFullYear() || typeof year !== "number")) {
-                throw new ApiError('Bad request, year incorrect', 400)
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
             }
 
             next()
@@ -57,20 +61,5 @@ module.exports = {
             next(e)
         }
     },
-    // dataNormalizer: (req, res, next) => {
-    //     try {
-    //         const {email, name} = req.body
-    //
-    //         if (email) {
-    //             req.body.email = email.toLowerCase()
-    //         }
-    //         if (name) {
-    //             req.body.name = userNormalizer.name(name)
-    //         }
-    //
-    //         next()
-    //     } catch (e) {
-    //         next(e)
-    //     }
-    // },
+
 }

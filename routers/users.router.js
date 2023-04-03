@@ -1,7 +1,7 @@
 const router = require('express').Router()
 
 const {userController} = require('../controllers')
-const {userMiddleware} = require('../middlewares')
+const {userMiddleware, authMiddleware} = require('../middlewares')
 
 router.get(
     '/',
@@ -9,28 +9,35 @@ router.get(
 );
 router.post(
     '/',
-    userMiddleware.checkDataCreateUser,
     userMiddleware.dataNormalizer,
+    userMiddleware.checkDataCreateUser,
     userMiddleware.checkIsEmailExist,
     userController.createUser
 );
 
 router.get(
     '/:userId',
-    userMiddleware.checkIsUserExistAndReturn,
+    userMiddleware.checkIsIdValid,
+    authMiddleware.checkAccessToken,
+    userMiddleware.getUserDynamically("userId","params","_id"),
+    // userMiddleware.checkUserWithCar,
     userController.getUserById
 );
 router.put(
     '/:userId',
-    userMiddleware.checkIsUserExist,
-    userMiddleware.checkDataUserUpdated,
+    userMiddleware.checkIsIdValid,
     userMiddleware.dataNormalizer,
+    userMiddleware.checkDataUserUpdated,
+    authMiddleware.checkAccessToken,
+    userMiddleware.getUserDynamically("userId","params","_id"),
     userMiddleware.checkIsEmailExist,
     userController.updateUser
 );
 router.delete(
     '/:userId',
-    userMiddleware.checkIsUserExist,
+    userMiddleware.checkIsIdValid,
+    authMiddleware.checkAccessToken,
+    userMiddleware.getUserDynamically("userId","params","_id"),
     userController.deleteUser
 );
 

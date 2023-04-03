@@ -1,4 +1,4 @@
-const {userServices} = require("../services");
+const {userServices, authServices} = require("../services");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
@@ -6,42 +6,44 @@ module.exports = {
             const users = await userServices.findByParams();
 
             res.json(users);
-        }catch (e) {
-            next (e)
+        } catch (e) {
+            next(e)
         }
     },
 
     createUser: async (req, res, next) => {
         try {
-            const user = await userServices.createOne(req.body)
+            const hashPassword = await authServices.hashPassword(req.newUser.password);
+
+            const user = await userServices.createOne({...req.newUser, password: hashPassword})
 
             res.status(201).json(user);
-        }catch (e) {
-            next (e)
+        } catch (e) {
+            next(e)
         }
     },
     getUserById: async (req, res, next) => {
         try {
-            const user = req.user
+            const userWithCars = await userServices.findBuIdWithCars(req.user._id);
 
-            res.json(user)
-        }catch (e) {
-            next (e)
+            res.json(userWithCars)
+        } catch (e) {
+            next(e)
         }
     },
     updateUser: async (req, res, next) => {
         try {
-            const { body, params } = req
+            const {newUser, params} = req
 
-           const user =  await userServices.findByIdAndUpdate(params.userId, body)
+            const user = await userServices.findByIdAndUpdate(params.userId, newUser)
 
             res.status(201).json(user);
 
-        }catch (e) {
-            next (e)
+        } catch (e) {
+            next(e)
         }
     },
-    deleteUser:async (req, res, next) => {
+    deleteUser: async (req, res, next) => {
         try {
             const {userId} = req.params
 
@@ -49,8 +51,8 @@ module.exports = {
 
             res.sendStatus(204)
 
-        }catch (e) {
-            next (e)
+        } catch (e) {
+            next(e)
         }
     }
 }

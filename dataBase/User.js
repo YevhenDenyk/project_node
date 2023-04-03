@@ -1,10 +1,10 @@
-const {model, Schema, Types} = require('mongoose')
+const {model, Schema} = require('mongoose')
 
 const userSchema = new Schema({
-    name: {required: true, type: String, default: ""},
+    name: {required: true, type: String},
     age: {required: true, type: Number},
     email: {required: true, type: String, trim: true, lowercase: true},
-    car: {type: Types.ObjectId, ref: 'Car'}
+    password: {required: true, type:String}
 }, {
     timestamps: true
 });

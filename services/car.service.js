@@ -5,7 +5,7 @@ module.exports={
         return Car.find(filter)
     },
     findOne:  async (filter = {})=>{
-        return Car.findOne(filter)
+        return Car.findOne(filter).populate('user')
     },
     create:  async (data)=>{
         return Car.create(data)
