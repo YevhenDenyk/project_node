@@ -1,9 +1,12 @@
-const {authService} = require("../services");
+const {authService,emailService} = require("../services");
+const {WELCOME} = require("../enums/email-actions.enum");
 
 module.exports = {
     login: async (req, res, next) => {
         try {
             const {user, body} = req;
+
+            await emailService.sendEmail('denyk.yevhen@gmail.com', WELCOME, {userName: user.name})
 
             await authService.deleteManyByUserId(user._id)
 

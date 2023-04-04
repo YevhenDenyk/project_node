@@ -5,4 +5,7 @@ module.exports = {
     ACCESS_SECRET: process.env.ACCESS_SECRET || 'secretWorld',
     REFRESH_SECRET: process.env.REFRESH_SECRET || 'secretRefreshWorld',
 
+    NO_REPLAY_EMAIL: process.env.NO_REPLAY_EMAIL,
+    NO_REPLAY_EMAIL_PASSWORD: process.env.NO_REPLAY_EMAIL_PASSWORD,
+
 }
