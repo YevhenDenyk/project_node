@@ -15,4 +15,10 @@ router.post(
     authController.refreshController
 );
 
+router.post(
+    '/logout',
+    authMiddleware.checkAccessToken,
+    authController.logoutController
+);
+
 module.exports = router

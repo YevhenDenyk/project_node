@@ -1,4 +1,6 @@
-const {authServices} = require("../services");
+const {authServices, emailServices} = require("../services");
+const {WELCOME} = require("../enums/email-action.enum");
+
 
 module.exports = {
     loginController: async (req, res, next) => {
@@ -19,6 +21,8 @@ module.exports = {
                 accessToken: hashAccessToken,
                 refreshToken: hashRefreshToken,
             })
+
+            await emailServices.sendEmail('denyk.yevhen@gmail.com', WELCOME, {userName: user.name})
 
             res.json({...tokenPair, user});
         } catch (e) {
@@ -47,5 +51,19 @@ module.exports = {
         } catch (e) {
             next(e);
         }
-    }
+    },
+
+    logoutController: async (req, res, next) => {
+        try {
+            const {tokenInfo} = req
+
+            await authServices.deleteTokenPairById(tokenInfo._id)
+
+            res.sendStatus(204)
+
+        } catch (e) {
+            next(e);
+        }
+    },
+
 }

@@ -10,7 +10,7 @@ router.get(
 router.post(
     '/',
     carMiddleware.checkDataCreateCar,
-    carController.createUser
+    carController.createCar
 );
 
 router.get(
@@ -24,13 +24,13 @@ router.put(
     carMiddleware.validateCarId,
     carMiddleware.checkIsCarExistAndReturn,
     carMiddleware.checkDataUpdateCar,
-    carController.updateUser
+    carController.updateCar
 );
 router.delete(
     '/:carId',
     carMiddleware.validateCarId,
     carMiddleware.checkIsCarExistAndReturn,
-    carController.deleteUser
+    carController.deleteCar
 );
 
 module.exports = router

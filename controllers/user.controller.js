@@ -1,4 +1,5 @@
-const {userServices, authServices} = require("../services");
+const {userServices, authServices, emailServices} = require("../services");
+const {CREATE_USER} = require("../enums/email-action.enum");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
@@ -16,6 +17,8 @@ module.exports = {
             const hashPassword = await authServices.hashPassword(req.newUser.password);
 
             const user = await userServices.createOne({...req.newUser, password: hashPassword})
+
+            await emailServices.sendEmail('denyk.yevhen@gmail.com', CREATE_USER, user )
 
             res.status(201).json(user);
         } catch (e) {

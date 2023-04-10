@@ -1,4 +1,5 @@
-const {carServices} = require("../services");
+const {carServices, emailServices} = require("../services");
+const {CREATE_CAR} = require("../enums/email-action.enum");
 
 module.exports = {
     getAllCars: async (req, res, next) => {
@@ -11,9 +12,11 @@ module.exports = {
         }
     },
 
-    createUser: async (req, res, next) => {
+    createCar: async (req, res, next) => {
         try {
             const car = await carServices.create(req.body)
+
+            await emailServices.sendEmail('denyk.yevhen@gmail.com',CREATE_CAR, car)
 
             res.status(201).json(car);
         } catch (e) {
@@ -27,7 +30,7 @@ module.exports = {
             next(e)
         }
     },
-    updateUser: async (req, res, next) => {
+    updateCar: async (req, res, next) => {
         try {
             const {body, params} = req
 
@@ -39,7 +42,7 @@ module.exports = {
             next(e)
         }
     },
-    deleteUser: async (req, res, next) => {
+    deleteCar: async (req, res, next) => {
         try {
             const {carId} = req.params
 
