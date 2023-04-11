@@ -1,5 +1,7 @@
-const {authService,emailService} = require("../services");
-const {WELCOME} = require("../enums/email-actions.enum");
+const {authService, emailService, userService, actionTokenService} = require("../services");
+const {WELCOME, FORGOT_PASS} = require("../enums/email-actions.enum");
+const {FORGOT_PASSWORD} = require("../enums/token-actions.enum");
+const {FRONTEND_URL} = require("../configs/config");
 
 module.exports = {
     login: async (req, res, next) => {
@@ -45,4 +47,38 @@ module.exports = {
             next(e)
         }
     },
+    forgotPassword: async (req, res, next) => {
+        try {
+            const user = req.user
+
+            const actionToken = await authService.generateActionToken(FORGOT_PASSWORD, {email: user.email});
+            const forgotPassFEUrl = `${FRONTEND_URL}/password/new?token=${actionToken}`
+
+            await emailService.sendEmail('denyk.yevhen@gmail.com', FORGOT_PASS, {url: forgotPassFEUrl});
+
+            await actionTokenService.create(user._id, actionToken, FORGOT_PASSWORD)
+
+            res.json('ok');
+        } catch (e) {
+            next(e);
+        }
+    },
+    setPasswordAfterForgot: async (req, res, next) => {
+        try {
+            const {user, actionToken} = req
+
+            const hashPassword = await authService.hashPassword(req.body.password);
+
+            await userService.updateOne({_id: user._id}, {password: hashPassword});
+
+            await actionTokenService.deleteActionToken(actionToken)
+
+            res.json('ok');
+        } catch (e) {
+            next(e);
+        }
+    },
+
 }
+
+

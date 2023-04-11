@@ -16,4 +16,16 @@ router.post(
     authController.refresh
 );
 
+router.post(
+    '/password/forgot',
+    userMiddleware.getUserDynamically('email'),
+    authController.forgotPassword
+);
+router.put(
+    '/password/forgot',
+    authMiddleware.isPasswordValid,
+    authMiddleware.checkActionToken,
+    authController.setPasswordAfterForgot
+);
+
 module.exports = router

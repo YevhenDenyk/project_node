@@ -4,8 +4,14 @@ const jwt = require('jsonwebtoken');
 const ApiError = require("../error/apiError");
 const OAuth = require("../dataBase/OAuth");
 
-const {ACCESS_SECRET, REFRESH_SECRET} = require("../configs/config");
+const {
+    ACCESS_SECRET,
+    REFRESH_SECRET,
+    CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET,
+    FORGOT_PASSWORD_ACTION_TOKEN_SECRET
+} = require("../configs/config");
 const {tokenTypeEnum} = require("../enums");
+const tokenTypes = require("../enums/token-actions.enum");
 
 
 module.exports = {
@@ -53,6 +59,41 @@ module.exports = {
         }
     },
 
+    generateActionToken: (actionTokenType, dataToSign = {}) => {
+        let secretWord = ''
+
+        switch (actionTokenType) {
+            case tokenTypes.CONFIRM_ACCOUNT:
+                secretWord = CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET;
+                break;
+            case tokenTypes.FORGOT_PASSWORD:
+                secretWord = FORGOT_PASSWORD_ACTION_TOKEN_SECRET;
+                break;
+        }
+
+        return  jwt.sign(dataToSign, secretWord, {expiresIn: '7d'});
+    },
+    checkActionToken: (token = '', actionTokenType) => {
+        try {
+            let secretWord = ''
+
+            switch (actionTokenType) {
+                case tokenTypes.CONFIRM_ACCOUNT:
+                    secretWord = CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET;
+                    break;
+                case tokenTypes.FORGOT_PASSWORD:
+                    secretWord = FORGOT_PASSWORD_ACTION_TOKEN_SECRET;
+                    break;
+            }
+
+            return jwt.verify(token, secretWord)
+
+        } catch (e) {
+            throw new ApiError('Token not valid', 401);
+        }
+    },
+
+
     findByUserId: async (_user_id) => {
         return OAuth.findOne({_user_id})
     },
@@ -63,10 +104,10 @@ module.exports = {
             refreshToken,
         })
     },
-    deleteManyByUserId: async (_user_id)=>{
+    deleteManyByUserId: async (_user_id) => {
         return OAuth.deleteMany({_user_id})
     },
-    deleteOneByRefresh: async (refreshToken)=>{
+    deleteOneByRefresh: async (refreshToken) => {
         await OAuth.deleteOne({refreshToken})
     }
 }

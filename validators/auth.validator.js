@@ -6,4 +6,7 @@ module.exports = {
         email: Joi.string().required().regex(regexp.EMAIL).lowercase().trim(),
         password: Joi.string().required().regex(regexp.PASSWORD),
     }),
+    passwordValidator: Joi.object({
+        password: Joi.string().required().regex(regexp.PASSWORD),
+    })
 }
