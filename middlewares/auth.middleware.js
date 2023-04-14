@@ -1,12 +1,40 @@
 const {authValidator} = require("../validators");
 const ApiError = require("../errors/ApiError");
-const {authServices} = require("../services");
+const {authServices, actionTokenServices} = require("../services");
 const {tokenTypeEnums} = require("../enums");
 
 module.exports = {
     isValidBody: async (req, res, next) => {
         try {
             const validate = authValidator.loginValidator.validate(req.body);
+
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
+            }
+
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
+    isValidEmail: async (req, res, next) => {
+        try {
+            const validate = authValidator.emailValidator.validate(req.body);
+
+            if (validate.error) {
+                throw new ApiError(validate.error.message, 400)
+            }
+
+            req.body = validate.value
+
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
+    isValidPassword: async (req, res, next) => {
+        try {
+            const validate = authValidator.passwordValidator.validate(req.body);
 
             if (validate.error) {
                 throw new ApiError(validate.error.message, 400)
@@ -25,7 +53,7 @@ module.exports = {
 
             const tokenInfo = await authServices.findTokenByIdUser(payload.id);
 
-            await authServices.compareToken( tokenInfo.accessToken , accessToken)
+            await authServices.compareToken(tokenInfo.accessToken, accessToken)
 
             req.tokenInfo = tokenInfo
 
@@ -42,9 +70,28 @@ module.exports = {
 
             const tokenInfo = await authServices.findTokenByIdUser(payload.id);
 
-            await authServices.compareToken( tokenInfo.refreshToken , refreshToken)
+            await authServices.compareToken(tokenInfo.refreshToken, refreshToken)
 
             req.tokenInfo = tokenInfo
+
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
+    checkActionToken: (actionTokenType) => async (req, res, next) => {
+        try {
+            const actionToken = req.get('Authorization')
+
+            await authServices.checkActionToken(actionToken, actionTokenType);
+
+            const tokenInfo = await actionTokenServices.findOneAndPopulate({actionToken});
+
+            if (!tokenInfo){
+                throw new ApiError('Token not valid', 401)
+            }
+
+            req.user = tokenInfo._user_id
 
             next();
         } catch (e) {

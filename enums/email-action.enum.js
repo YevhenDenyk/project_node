@@ -1,5 +1,6 @@
 module.exports = {
     WELCOME: 1,
-    CREATE_USER: 2,
-    CREATE_CAR:3,
+    LOGOUT: 2,
+    FORGOT_PASS:3,
+    DELETE_ACCOUNT:4,
 }

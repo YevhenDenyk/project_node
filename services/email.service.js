@@ -1,12 +1,12 @@
 const nodemailer = require('nodemailer');
-const EmailTemplates = require('email-templates');
+const hbs = require('nodemailer-express-handlebars');
 const path = require('path');
 
 const emailTemplates = require('../email-templates')
-const {NO_REPLAY_EMAIL_PASSWORD,NO_REPLAY_EMAIL} = require('../configs/config')
+const {NO_REPLAY_EMAIL_PASSWORD, NO_REPLAY_EMAIL, FRONTEND_URL} = require('../configs/config')
 const ApiError = require("../errors/ApiError");
 
-const sendEmail = async (receiverEmail, emailAction, locals = {}) => {
+const sendEmail = async (receiverEmail, emailAction, context = {}) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -17,26 +17,34 @@ const sendEmail = async (receiverEmail, emailAction, locals = {}) => {
 
     const templateInfo = emailTemplates[emailAction]
 
-    if (!templateInfo){
+    if (!templateInfo?.subject || !templateInfo?.templateName) {
         throw new ApiError('Wrong template', 500)
     }
 
-    const templateRender = new EmailTemplates({
-        views: {
-            root: path.join(process.cwd(), 'email-templates')
-        }
-    })
+    const options = {
+        viewEngine: {
+            defaultLayout: 'main',
+            layoutsDir: path.join(process.cwd(), 'email-templates', 'layouts'),
+            partialsDir: path.join(process.cwd(), 'email-templates', 'partials'),
+            extname: '.hbs'
+        },
+        viewPath: path.join(process.cwd(), 'email-templates', 'views'),
+        extName: '.hbs'
+    }
 
-    const html = await templateRender.render(templateInfo.templateName, locals);
+    transporter.use('compile', hbs(options))
+
+    context.frontendURL = FRONTEND_URL
 
     return transporter.sendMail({
         from: 'No relly',        //Імя юзера який прислав
         to: receiverEmail,       // Кому шлемо емайл
         subject: templateInfo.subject,  //тема листа
-        html //шаблон листа
+        template: templateInfo.templateName,
+        context
     })
 }
 
 module.exports = {
-    sendEmail
+    sendEmail,
 }

@@ -1,5 +1,6 @@
 const {userServices, authServices, emailServices} = require("../services");
-const {CREATE_USER} = require("../enums/email-action.enum");
+const {WELCOME} = require("../enums/email-action.enum");
+const {emailTypeEnums} = require("../enums");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
@@ -18,7 +19,7 @@ module.exports = {
 
             const user = await userServices.createOne({...req.newUser, password: hashPassword})
 
-            await emailServices.sendEmail('denyk.yevhen@gmail.com', CREATE_USER, user )
+            await emailServices.sendEmail(user.email, WELCOME, {userName: user.name})
 
             res.status(201).json(user);
         } catch (e) {
@@ -49,8 +50,11 @@ module.exports = {
     deleteUser: async (req, res, next) => {
         try {
             const {userId} = req.params
+            const {name, email} = req.user
 
             await userServices.findByIdAndDelete(userId)
+
+            await emailServices.sendEmail(email, emailTypeEnums.DELETE_ACCOUNT, {name})
 
             res.sendStatus(204)
 

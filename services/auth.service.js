@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 const ApiError = require("../errors/ApiError");
 const config = require("../configs/config");
-const {tokenTypeEnums} = require("../enums");
+const {tokenTypeEnums, actionTokenTypeEnums} = require("../enums");
 const OAuth = require('../dataBase/OAuth');
 
 module.exports = {
@@ -55,6 +55,41 @@ module.exports = {
             throw new ApiError('Token not valid', 401)
         }
     },
+    
+
+    generateActionToken: (dataToSing = {}, actionTokenType) => {
+        let secretWord = ''
+
+        switch (actionTokenType) {
+            case actionTokenTypeEnums.FORGOT_PASSWORD:
+                secretWord = config.FORGOT_PASSWORD_ACTION_TOKEN_SECRET;
+                break;
+            case actionTokenTypeEnums.CONFIRM_ACCOUNT:
+                secretWord = config.CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET;
+                break;
+        }
+
+        return jwt.sign(dataToSing, secretWord, {expiresIn: '1d'})
+    },
+    checkActionToken: ( actionToken, actionTokenType ) => {
+        try {
+            let secretWord = '';
+
+            switch (actionTokenType) {
+                case actionTokenTypeEnums.FORGOT_PASSWORD:
+                    secretWord = config.FORGOT_PASSWORD_ACTION_TOKEN_SECRET;
+                    break;
+                case actionTokenTypeEnums.CONFIRM_ACCOUNT:
+                    secretWord = config.CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET;
+                    break;
+            }
+            return jwt.verify(actionToken, secretWord);
+
+        } catch (e) {
+            throw new ApiError('Token mot valid', 401)
+        }
+    },
+
 
     createTokenToBd: async (data) => {
         return OAuth.create(data)

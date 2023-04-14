@@ -5,6 +5,8 @@ const carSchema = new Schema({
     year: {type: Number, required: true},
     price: {type: Number, required: true},
     user: {type: Schema.Types.ObjectId, ref: 'User'}
+},{
+    timestamps: true
 })
 
 module.exports = model('Car', carSchema);

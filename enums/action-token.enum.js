@@ -1,0 +1,4 @@
+module.exports = {
+    FORGOT_PASSWORD: 'FORGOT_PASSWORD',
+    CONFIRM_ACCOUNT:'CONFIRM_ACCOUNT',
+}

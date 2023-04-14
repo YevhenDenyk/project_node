@@ -1,17 +1,21 @@
-const {CREATE_CAR, CREATE_USER, WELCOME} = require('../enums/email-action.enum');
+const {WELCOME, FORGOT_PASS, LOGOUT, DELETE_ACCOUNT} = require('../enums/email-action.enum');
 
 module.exports = {
     [WELCOME]: {
         subject: 'Welcome on project',
         templateName: 'welcome'
     },
-    [CREATE_CAR]: {
-        subject: 'Successful create car',
-        templateName: 'createCar'
+    [LOGOUT]: {
+        subject: 'Successful logout',
+        templateName: 'logout'
     },
-    [CREATE_USER]: {
-        subject: 'Successful create user',
-        templateName: 'createUser'
+    [DELETE_ACCOUNT]: {
+        subject: 'Successful delete account',
+        templateName: 'delete-account'
+    },
+    [FORGOT_PASS]: {
+        subject: 'Forgot password',
+        templateName: 'forgot-password'
     },
 
 }
