@@ -1,6 +1,6 @@
 const Joi = require("joi");
 
-const {MONGO_ID} = require("../configs/regex.enum");
+const {MONGO_ID} = require("../enums/regex.enum");
 
 module.exports = {
     createCarValidator: Joi.object({
