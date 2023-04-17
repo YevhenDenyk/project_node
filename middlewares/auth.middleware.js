@@ -47,6 +47,8 @@ module.exports = {
 
             await authService.compareToken(tokenInfo.accessToken, accessToken)
 
+            req.tokenInfo = tokenInfo
+
             next();
         } catch (e) {
             next(e);

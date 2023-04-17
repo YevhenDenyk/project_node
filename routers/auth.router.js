@@ -27,5 +27,10 @@ router.put(
     authMiddleware.checkActionToken,
     authController.setPasswordAfterForgot
 );
+router.post(
+    '/logout',
+    authMiddleware.checkAccessToken,
+    authController.logout
+);
 
 module.exports = router

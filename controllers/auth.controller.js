@@ -1,5 +1,5 @@
 const {authService, emailService, userService, actionTokenService} = require("../services");
-const {WELCOME, FORGOT_PASS} = require("../enums/email-actions.enum");
+const {FORGOT_PASS, LOGOUT} = require("../enums/email-actions.enum");
 const {FORGOT_PASSWORD} = require("../enums/token-actions.enum");
 const {FRONTEND_URL} = require("../configs/config");
 
@@ -7,8 +7,6 @@ module.exports = {
     login: async (req, res, next) => {
         try {
             const {user, body} = req;
-
-            await emailService.sendEmail('denyk.yevhen@gmail.com', WELCOME, {userName: user.name})
 
             await authService.deleteManyByUserId(user._id)
 
@@ -54,7 +52,7 @@ module.exports = {
             const actionToken = await authService.generateActionToken(FORGOT_PASSWORD, {email: user.email});
             const forgotPassFEUrl = `${FRONTEND_URL}/password/new?token=${actionToken}`
 
-            await emailService.sendEmail('denyk.yevhen@gmail.com', FORGOT_PASS, {url: forgotPassFEUrl});
+            await emailService.sendEmail(user.email, FORGOT_PASS, {url: forgotPassFEUrl, userName: user.name});
 
             await actionTokenService.create(user._id, actionToken, FORGOT_PASSWORD)
 
@@ -78,7 +76,21 @@ module.exports = {
             next(e);
         }
     },
+    logout: async (req, res, next) => {
+        try {
+            const {_user_id} = req.tokenInfo;
 
+            await authService.deleteManyByUserId(_user_id)
+
+            const user = await userService.findOne({_id: _user_id});
+
+            await emailService.sendEmail(user.email, LOGOUT, {userName: user.name})
+
+            res.sendStatus(204);
+        } catch (e) {
+            next(e);
+        }
+    },
 }
 
 

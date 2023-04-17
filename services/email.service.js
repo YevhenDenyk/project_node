@@ -1,13 +1,13 @@
 const nodemailer = require('nodemailer');
-const EmailTemplates = require('email-templates');
+const hbs = require('nodemailer-express-handlebars');
 const path = require('path');
 
-const {NO_REPLAY_EMAIL, NO_REPLAY_EMAIL_PASSWORD} = require('../configs/config');
+const {NO_REPLAY_EMAIL, NO_REPLAY_EMAIL_PASSWORD, FRONTEND_URL} = require('../configs/config');
 const emailTemplates = require('../email-templates');
 const ApiError = require("../error/apiError");
 
 
-const sendEmail = async (receiverEmail, emailAction, locals={}) => {
+const sendEmail = async (receiverEmail, emailAction, context = {}) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -18,25 +18,31 @@ const sendEmail = async (receiverEmail, emailAction, locals={}) => {
 
     const templateInfo = emailTemplates[emailAction];
 
-    if (!templateInfo){
+    if (!templateInfo?.subject || !templateInfo?.templateName) {
         throw new ApiError('Wrong template', 500)
     }
 
-    const templateRenderer = new EmailTemplates({
-        views: {
-            root: path.join(process.cwd(), 'email-templates')
-        }
-    });
+    const options = {
+        viewEngine: {
+            defaultLayout: 'main',
+            layoutsDir: path.join(process.cwd(), 'email-templates', 'layouts'),
+            partialsDir: path.join(process.cwd(), 'email-templates', 'partials'),
+            extname: '.hbs'
+        },
+        viewPath: path.join(process.cwd(), 'email-templates', 'views'),
+        extName: '.hbs'
+    }
 
-    Object.assign(locals || {}, {frontendURL: 'google.com'})
+    transporter.use('compile', hbs(options));
 
-    const html = await templateRenderer.render(templateInfo.templateName, locals );
+    context.frontendURL = FRONTEND_URL
 
-    transporter.sendMail({
-        from: 'No relly',        //Імя юзера який прислав
-        to: receiverEmail,       // Кому шлемо емайл
-        subject: templateInfo.subject,  //тема листа
-        html //шаблон листа
+    return transporter.sendMail({
+        from: 'No relly',
+        to: receiverEmail,
+        subject: templateInfo.subject,
+        template: templateInfo.templateName,
+        context
     })
 
 }
