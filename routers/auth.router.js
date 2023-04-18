@@ -25,6 +25,7 @@ router.put(
     '/password/forgot',
     authMiddleware.isPasswordValid,
     authMiddleware.checkActionToken,
+    authMiddleware.checkOldPasswords,
     authController.setPasswordAfterForgot
 );
 router.post(

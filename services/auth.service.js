@@ -26,6 +26,9 @@ module.exports = {
         }
 
     },
+    compareOldPassword: (hashPassword, password) => {
+        return bcrypt.compare(password, hashPassword);
+    },
 
     hashToken: (token) => bcrypt.hash(token, 10),
     compareToken: async (hashToken, token) => {
@@ -71,7 +74,7 @@ module.exports = {
                 break;
         }
 
-        return  jwt.sign(dataToSign, secretWord, {expiresIn: '7d'});
+        return jwt.sign(dataToSign, secretWord, {expiresIn: '7d'});
     },
     checkActionToken: (token = '', actionTokenType) => {
         try {

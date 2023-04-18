@@ -1,4 +1,4 @@
-const {authService, emailService, userService, actionTokenService} = require("../services");
+const {authService, emailService, userService, actionTokenService, oldPasswordService} = require("../services");
 const {FORGOT_PASS, LOGOUT} = require("../enums/email-actions.enum");
 const {FORGOT_PASSWORD} = require("../enums/token-actions.enum");
 const {FRONTEND_URL} = require("../configs/config");
@@ -10,7 +10,7 @@ module.exports = {
 
             await authService.deleteManyByUserId(user._id)
 
-            await authService.comparePassword(user.password, body.password)
+            await authService.comparePassword(user.password, body.password);
 
             const tokenPair = authService.generateAccessTokenPair({id: user._id});
 
@@ -66,6 +66,8 @@ module.exports = {
             const {user, actionToken} = req
 
             const hashPassword = await authService.hashPassword(req.body.password);
+
+            await oldPasswordService.create(user._id, user.password);
 
             await userService.updateOne({_id: user._id}, {password: hashPassword});
 

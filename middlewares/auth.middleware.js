@@ -1,7 +1,7 @@
 const ApiError = require("../error/apiError");
 
 const {authValidator} = require('../validators')
-const {authService, actionTokenService} = require("../services");
+const {authService, actionTokenService, oldPasswordService} = require("../services");
 const {tokenTypeEnum} = require("../enums");
 const {FORGOT_PASSWORD} = require("../enums/token-actions.enum");
 
@@ -94,6 +94,34 @@ module.exports = {
             req.user = response._user_id
 
             next();
+        } catch (e) {
+            next(e);
+        }
+    },
+    checkOldPasswords: async (req, res, next) => {
+        try {
+            const {_id, password} = req.user;
+
+            const oldPasswords = await oldPasswordService.findAllPasswordByUser(_id);
+
+            oldPasswords.push({oldPassword: password})
+
+//в перевірці масиву не має сенсу, оскільки в ньому буде мінімум один пароль яким користувалися
+//             if (!oldPasswords.length) {
+//                 return next();
+//             }
+
+            const results = await Promise.all(
+                oldPasswords.map((record) => authService.compareOldPassword(record.oldPassword, req.body.password))
+            );
+
+            const condition = results.some((res) => res);
+
+            if (condition) {
+                throw new ApiError("This is old password", 409)
+            }
+
+            // next();
         } catch (e) {
             next(e);
         }
