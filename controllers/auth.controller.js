@@ -1,4 +1,4 @@
-const {authServices, emailServices, actionTokenServices, userServices} = require("../services");
+const {authServices, emailServices, actionTokenServices, userServices, oldPasswordServices} = require("../services");
 const {emailTypeEnums, actionTokenTypeEnums} = require("../enums");
 const {FRONTEND_URL} = require("../configs/config");
 
@@ -96,6 +96,8 @@ module.exports = {
             const actionToken = req.get('Authorization')
 
             const hashPassword = await authServices.hashPassword(body.password);
+
+            await oldPasswordServices.create(user._id, user.password);
 
             await userServices.findByIdAndUpdate(user._id, {password: hashPassword});
 

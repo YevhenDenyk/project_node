@@ -4,4 +4,5 @@ module.exports = {
     authServices: require('./auth.service'),
     emailServices: require('./email.service'),
     actionTokenServices: require('./actionToken.service'),
+    oldPasswordServices: require('./oldPassword.service'),
 };
