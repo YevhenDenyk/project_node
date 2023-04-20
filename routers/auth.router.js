@@ -33,6 +33,7 @@ router.put(
     '/password/forgot',
     authMiddleware.isValidPassword,
     authMiddleware.checkActionToken(actionTokenTypeEnums.FORGOT_PASSWORD),
+    authMiddleware.checkOldPassword,
     authController.newForgotPasswordController
 );
 

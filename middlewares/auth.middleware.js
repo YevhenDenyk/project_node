@@ -1,6 +1,6 @@
 const {authValidator} = require("../validators");
 const ApiError = require("../errors/ApiError");
-const {authServices, actionTokenServices} = require("../services");
+const {authServices, actionTokenServices, oldPasswordServices} = require("../services");
 const {tokenTypeEnums} = require("../enums");
 
 module.exports = {
@@ -87,11 +87,31 @@ module.exports = {
 
             const tokenInfo = await actionTokenServices.findOneAndPopulate({actionToken});
 
-            if (!tokenInfo){
+            if (!tokenInfo) {
                 throw new ApiError('Token not valid', 401)
             }
 
             req.user = tokenInfo._user_id
+
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
+    checkOldPassword: async (req, res, next) => {
+        try {
+            const {user, body} = req;
+
+            const oldPasswords = await oldPasswordServices.find(user._id);
+            oldPasswords.push({oldPassword: user.password});
+
+            const results = await Promise.all(oldPasswords.map((record) => authServices.compareOldPassword(record.oldPassword, body.password)))
+
+            const conditions = results.some((result) => result)
+
+            if (conditions) {
+                throw new ApiError('This is old password', 409)
+            }
 
             next();
         } catch (e) {

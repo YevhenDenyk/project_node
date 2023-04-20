@@ -18,6 +18,9 @@ module.exports = {
             throw new ApiError('Wrong password', 400)
         }
     },
+    compareOldPassword: async (hashPassword, password) => {
+        return  bcrypt.compare(password, hashPassword);
+    },
 
     hashToken: async (token) => {
         return bcrypt.hash(token, 10)
@@ -102,5 +105,8 @@ module.exports = {
     },
     deleteTokenPairById: async (_id) => {
         return OAuth.deleteOne({_id})
+    },
+    deleteManyTimeAgo: async (timeAgo) => {
+        return OAuth.deleteMany({createdAt: {$lte: timeAgo}})
     },
 }
