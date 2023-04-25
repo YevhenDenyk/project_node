@@ -29,7 +29,8 @@
     "mongoose": "^7.0.2",
     "nodemailer": "^6.9.1",
     "nodemailer-express-handlebars": "^6.1.0",
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "swagger-ui-express": "^4.6.2"
   },
   "devDependencies": {
     "@types/nodemailer": "^6.4.7"

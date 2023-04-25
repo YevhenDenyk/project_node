@@ -6,7 +6,7 @@ module.exports = {
         return Cars.find(filter)
     },
     findById: async (id) => {
-        return Cars.findById(id).populate('user')
+        return Cars.findCarAndPopulateUser(id)
     },
     create: async (data) => {
         return Cars.create(data)

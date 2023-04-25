@@ -1,4 +1,4 @@
-const {userService, authService, emailService} = require("../services");
+const {userService, emailService} = require("../services");
 const {WELCOME, DELETE_ACCOUNT} = require("../enums/email-actions.enum");
 
 module.exports = {
@@ -12,9 +12,7 @@ module.exports = {
     },
     createUser: async (req, res, next) => {
         try {
-            const hashPassword = await authService.hashPassword(req.body.password);
-
-            const newUser = await userService.create({...req.body, password: hashPassword});
+            const newUser = await userService.createUserWithHashPassword(req.body);
 
             await emailService.sendEmail(newUser.email, WELCOME, {userName: newUser.name})
 

@@ -6,7 +6,19 @@ const carSchema = new Schema({
     price: {type: Number, required: true, trim: true},
     user: {type: Schema.Types.ObjectId, ref: 'User'},
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: {virtuals: true},
+    toObject: {virtuals: true}
 })
+
+carSchema.virtual("randomNumber").get(function () {
+    return `${this.year}` * `${this.price}`
+})
+
+carSchema.statics = {
+   async findCarAndPopulateUser(id) {
+       return  this.findById(id).populate('user')
+    }
+}
 
 module.exports = model('Car', carSchema);

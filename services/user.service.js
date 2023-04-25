@@ -28,8 +28,8 @@ module.exports = {
     updateOne: async (userId, newInfo) => {
         return User.findByIdAndUpdate(userId, newInfo, {new: true})
     },
-    create: async (data) => {
-        return User.create(data)
+    createUserWithHashPassword: async (userObject) => {
+        return User.createWithHashPassword(userObject)
     },
     deleteById: async (id) => {
         return User.deleteOne({_id: id})

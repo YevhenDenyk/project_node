@@ -7,7 +7,7 @@ const OAuth = require('../dataBase/OAuth');
 dayjs.extend(utc);
 
 module.exports = new CronJob(
-    '* * */1 * * *',
+    '* 0 6 */1 * *',
     async function () {
         try {
             console.log('Start removing tokens')

@@ -10,7 +10,8 @@ module.exports = {
 
             await authService.deleteManyByUserId(user._id)
 
-            await authService.comparePassword(user.password, body.password);
+            // await authService.comparePassword(user.password, body.password);
+            await user.comparePassword(body.password);
 
             const tokenPair = authService.generateAccessTokenPair({id: user._id});
 

@@ -1,0 +1,296 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "0.1",
+    "title": "June-22"
+  },
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/users/{userId}": {
+      "get": {
+        "description": "Get user by id",
+        "tags": [
+          "User"
+        ],
+        "operationId": "getUserById",
+        "parameters": [
+          {
+            "description": " _id - user in data base",
+            "name": "userId",
+            "in": "path",
+            "type": "string",
+            "required": true
+          },
+          {
+            "description": "access token key",
+            "name": "Authorization",
+            "in": "header",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "$ref": "#/definitions/SingleUser"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          },
+          "401": {
+            "description": "Token invalid / No token"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ]
+      },
+      "put": {
+        "description": "Update user",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "operationId": "UpdateUserById",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "in": "header"
+          },
+          {
+            "name": "name",
+            "required": false,
+            "type": "string",
+            "in": "formData"
+          },
+          {
+            "name": "age",
+            "required": false,
+            "type": "integer",
+            "in": "formData"
+          },
+          {
+            "name": "email",
+            "required": false,
+            "type": "string",
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User was updated",
+            "schema": {
+              "$ref": "#/definitions/SingleUser"
+            }
+          },
+          "400": {
+            "description": "User id invalid / Body invalid"
+          },
+          "401": {
+            "description": "Token invalid / No token"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "User with this email already exists"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete user by id",
+        "tags": [
+          "User"
+        ],
+        "operationId": "DeleteUser",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "required": true,
+            "type": "string",
+            "in": "header"
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "type": "string",
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User was deleted"
+          },
+          "400": {
+            "description": "User id invalid"
+          },
+          "401": {
+            "description": "Token invalid / No token"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "Get all users",
+        "tags": [
+          "User"
+        ],
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SingleUser"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create user",
+        "operationId": "createUser",
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "type": "string",
+            "in": "formData"
+          },
+          {
+            "name": "age",
+            "required": true,
+            "type": "integer",
+            "in": "formData"
+          },
+          {
+            "name": "email",
+            "required": true,
+            "type": "string",
+            "in": "formData",
+            "pattern": "/^[^\\s@]+@([^\\s@.,]+\\.)+[^\\s@.,]{2,}$/"
+          },
+          {
+            "name": "password",
+            "required": true,
+            "type": "string",
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success create",
+            "schema": {
+              "$ref": "#/definitions/SingleUser"
+            }
+          },
+          "400": {
+            "description": "Body invalid"
+          },
+          "409": {
+            "description": "User with this email already exists"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "400": {
+      "description": "User id invalid"
+    },
+    "401": {
+      "description": "Token invalid / No token"
+    },
+    "404": {
+      "description": "User not found"
+    },
+    "409": {
+      "description": "User with this email already exists"
+    },
+    "ApiError": {
+      "properties": {
+        "statusCode": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Something went wrong"
+        }
+      }
+    },
+    "SingleUser": {
+      "properties": {
+        "_id": {
+          "type": "string",
+          "title": "ID",
+          "readOnly": true,
+          "example": "6422e90f22c474b3316bcaea"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 20,
+          "example": "Viktor"
+        },
+        "age": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120,
+          "example": "10"
+        },
+        "email": {
+          "type": "string",
+          "pattern": "/^[^\\s@]+@([^\\s@.,]+\\.)+[^\\s@.,]{2,}$/",
+          "example": "fwefe@vd.tr"
+        },
+        "password": {
+          "type": "string",
+          "minLength": 8,
+          "pattern": "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_])[A-Za-z\\d@$!%*?&_]{8,}$/",
+          "example": "$2b$10$CJmw1A37ztbUZzkh8TKVZOQe"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api-key": {
+      "type": "apiKey",
+      "name": "api-key",
+      "in": "header"
+    }
+  }
+}
+
