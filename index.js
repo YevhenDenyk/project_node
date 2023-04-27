@@ -1,10 +1,12 @@
 const express = require('express');
 require('dotenv').config();
 const mongoose = require('mongoose');
+const swaggerUi = require('swagger-ui-express');
 
 const config = require('./configs/config');
 const {carRouter, userRouter, authRouter} = require('./routers');
 const {cronRunner} = require("./crones");
+const swagger = require("./swagger.json");
 
 const app = express();
 
@@ -14,6 +16,7 @@ app.use(express.urlencoded({extended: true}));
 app.use('/auth', authRouter);
 app.use('/cars', carRouter);
 app.use('/users', userRouter);
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swagger));
 
 
 app.use((err, req, res, next) => {
