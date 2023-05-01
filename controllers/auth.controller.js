@@ -1,7 +1,16 @@
-const {authService, emailService, userService, actionTokenService, oldPasswordService} = require("../services");
+const {
+    authService,
+    emailService,
+    userService,
+    actionTokenService,
+    oldPasswordService,
+    smsService
+} = require("../services");
 const {FORGOT_PASS, LOGOUT} = require("../enums/email-actions.enum");
 const {FORGOT_PASSWORD} = require("../enums/token-actions.enum");
 const {FRONTEND_URL} = require("../configs/config");
+const {smsTemplate} = require("../helper");
+const {smsTypeEnum} = require("../enums");
 
 module.exports = {
     login: async (req, res, next) => {
@@ -18,7 +27,10 @@ module.exports = {
             const accessHashToken = await authService.hashToken(tokenPair.accessToken);
             const refreshHashToken = await authService.hashToken(tokenPair.refreshToken);
 
-            await authService.createInAuthBase(user._id, accessHashToken, refreshHashToken)
+            await Promise.allSettled([
+                authService.createInAuthBase(user._id, accessHashToken, refreshHashToken),
+                smsService.sendSms(smsTemplate[smsTypeEnum.WELCOME](user.name), user.phone)
+            ])
 
 
             res.json({user, ...tokenPair})
@@ -53,9 +65,11 @@ module.exports = {
             const actionToken = await authService.generateActionToken(FORGOT_PASSWORD, {email: user.email});
             const forgotPassFEUrl = `${FRONTEND_URL}/password/new?token=${actionToken}`
 
-            await emailService.sendEmail(user.email, FORGOT_PASS, {url: forgotPassFEUrl, userName: user.name});
-
-            await actionTokenService.create(user._id, actionToken, FORGOT_PASSWORD)
+            await Promise.allSettled([
+                emailService.sendEmail(user.email, FORGOT_PASS, {url: forgotPassFEUrl, userName: user.name}),
+                smsService.sendSms(smsTemplate[smsTypeEnum.FORGOT_PASS](user.name), user.phone),
+                actionTokenService.create(user._id, actionToken, FORGOT_PASSWORD),
+            ])
 
             res.json('ok');
         } catch (e) {
@@ -87,7 +101,10 @@ module.exports = {
 
             const user = await userService.findOne({_id: _user_id});
 
-            await emailService.sendEmail(user.email, LOGOUT, {userName: user.name})
+            await Promise.allSettled([
+                emailService.sendEmail(user.email, LOGOUT, {userName: user.name}),
+                smsService.sendSms(smsTemplate[smsTypeEnum.LOGOUT](), user.phone)
+            ])
 
             res.sendStatus(204);
         } catch (e) {

@@ -1,5 +1,6 @@
-const {userService, emailService} = require("../services");
-const {WELCOME, DELETE_ACCOUNT} = require("../enums/email-actions.enum");
+const {userService, emailService, smsService} = require("../services");
+const {smsTypeEnum, emailActionsEnum} = require("../enums");
+const {smsTemplate} = require("../helper");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
@@ -14,7 +15,8 @@ module.exports = {
         try {
             const newUser = await userService.createUserWithHashPassword(req.body);
 
-            await emailService.sendEmail(newUser.email, WELCOME, {userName: newUser.name})
+            await emailService.sendEmail(newUser.email, emailActionsEnum.WELCOME, {userName: newUser.name})
+            await smsService.sendSms(smsTemplate[smsTypeEnum.WELCOME](newUser.name), newUser.phone)
 
             res.status(201).json(newUser)
         } catch (e) {
@@ -44,15 +46,18 @@ module.exports = {
     deleteUser: async (req, res, next) => {
         try {
             const {userID} = req.params
-            const {email, name} = req.user
+            const {email, name, phone} = req.user
 
-            await userService.deleteById(userID)
-
-            await emailService.sendEmail(email, DELETE_ACCOUNT, {userName: name})
+            await Promise.allSettled([
+                userService.deleteById(userID),
+                emailService.sendEmail(email, emailActionsEnum.DELETE_ACCOUNT, {userName: name}),
+                smsService.sendSms(smsTemplate[smsTypeEnum.DELETE_ACCOUNT](), phone)
+            ])
 
             res.sendStatus(204)
         } catch (e) {
             next(e)
         }
     },
+
 }

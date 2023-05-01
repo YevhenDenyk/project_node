@@ -5,4 +5,5 @@ module.exports = {
     emailService: require('./email.service'),
     actionTokenService:require('./actionToken.service'),
     oldPasswordService:require('./oldPassword.service'),
+    smsService:require('./sms.service'),
 };

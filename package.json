@@ -30,7 +30,8 @@
     "nodemailer": "^6.9.1",
     "nodemailer-express-handlebars": "^6.1.0",
     "nodemon": "^2.0.22",
-    "swagger-ui-express": "^4.6.2"
+    "swagger-ui-express": "^4.6.2",
+    "twilio": "^4.10.0"
   },
   "devDependencies": {
     "@types/nodemailer": "^6.4.7"

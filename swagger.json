@@ -1,13 +1,14 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "0.1",
-    "title": "June-22"
+    "version": "1.0",
+    "description": "listening project",
+    "title": "June 22"
   },
   "schemes": [
-    "https",
     "http"
   ],
+
   "paths": {
     "/users/{userId}": {
       "get": {
@@ -224,8 +225,170 @@
           }
         }
       }
+    },
+    "/cars/": {
+      "get": {
+        "description": "Get all car",
+        "tags": ["Cars"],
+        "operationId": "getAllCar",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SingleCar"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "create new car",
+        "tags": ["Cars"],
+        "operationId": "createCar",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful crate car",
+            "schema": {
+
+              "$ref": "#/definitions/SingleCar"
+            }
+          },
+          "400": {
+            "description": "Car is fields invalid"
+          }
+        }
+      }
+    },
+    "/cars/{carId}": {
+      "get": {
+        "description": "get Car by id and populate User",
+        "tags": ["Cars"],
+        "operationId": "getCarFromId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "carId",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "properties": {
+                "_id": {
+                  "example": "6422e90f22c474b3316bcaea"
+                },
+                "model":{
+                  "example": "BMW"
+                },
+                "year": {
+                  "example": 2014
+                },
+                "price": {
+                  "example": 302678
+                },
+                "user": {
+                  "properties": {
+                    "_id": {
+                      "example": "6422e90f22c474b3316bcaea"
+                    },
+                    "name": {
+                      "example": "Viktor"
+                    },
+                    "age": {
+                      "example": "10"
+                    },
+                    "email": {
+                      "example": "fwefe@vd.tr"
+                    },
+                    "password": {
+                      "example": "$2b$10$CJmw1A37ztbUZzkh8TKVZOQe"
+                    }
+                  }
+                }
+
+              }
+            }
+          },
+          "404": {
+            "description": "Car not found"
+          }
+        }
+      },
+      "put": {
+        "description": "update Car",
+        "tags": ["Cars"],
+        "operationId": "updateCar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "carId",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/SingleCar"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "$ref": "#/definitions/SingleCar"
+            }
+          },
+          "400": {
+            "description": "Car is fields invalid"
+          },
+          "404": {
+            "description": "Car not found"
+          }
+        }
+      },
+      "delete": {
+        "description": "delete car by id",
+        "operationId": "deleteCar",
+        "tags": ["Cars"],
+        "parameters": [{
+          "in": "path",
+          "type": "string",
+          "name": "carId",
+          "required": true
+        }],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "404": {
+            "description": "Car not found"
+          }
+        }
+      }
     }
   },
+
+
+
+
+
   "definitions": {
     "400": {
       "description": "User id invalid"
@@ -282,6 +445,39 @@
           "pattern": "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_])[A-Za-z\\d@$!%*?&_]{8,}$/",
           "example": "$2b$10$CJmw1A37ztbUZzkh8TKVZOQe"
         }
+      }
+    },
+    "SingleCar": {
+      "properties": {
+        "_id": {
+          "type": "string",
+          "title": "ID",
+          "readOnly": true,
+          "example": "6422e90f22c474b3316bcaea"
+        },
+        "model":{
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 15,
+          "example": "BMW"
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1990,
+          "maximum": "this Year",
+          "example": 2014
+        },
+        "price": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999999,
+          "example": 302678
+        },
+        "user": {
+          "type": "string",
+          "example": "6422e90f22c474b3316bcaea"
+        }
+
       }
     }
   },
