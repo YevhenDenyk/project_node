@@ -6,7 +6,8 @@ const userSchema = new Schema({
     name: {required: true, type: String},
     age: {required: true, type: Number},
     email: {required: true, type: String, trim: true, lowercase: true},
-    password: {required: true, type:String}
+    password: {required: true, type:String},
+    phone: {required:true, type: String}
 }, {
     timestamps: true,
     toJSON: {virtuals:true},

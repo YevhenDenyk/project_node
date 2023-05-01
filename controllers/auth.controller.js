@@ -1,5 +1,13 @@
-const {authServices, emailServices, actionTokenServices, userServices, oldPasswordServices} = require("../services");
-const {emailTypeEnums, actionTokenTypeEnums} = require("../enums");
+const {
+    authServices,
+    emailServices,
+    actionTokenServices,
+    userServices,
+    oldPasswordServices,
+    smsServices
+} = require("../services");
+const {emailTypeEnums, actionTokenTypeEnums, smsTypeEnums} = require("../enums");
+const {smsTemplate} = require("../helper");
 const {FRONTEND_URL} = require("../configs/config");
 
 
@@ -17,11 +25,17 @@ module.exports = {
             const hashAccessToken = await authServices.hashToken(tokenPair.accessToken)
             const hashRefreshToken = await authServices.hashToken(tokenPair.refreshToken)
 
-            await authServices.createTokenToBd({
-                _user_id: user._id,
-                accessToken: hashAccessToken,
-                refreshToken: hashRefreshToken,
-            })
+            await Promise.allSettled([
+
+                authServices.createTokenToBd({
+                    _user_id: user._id,
+                    accessToken: hashAccessToken,
+                    refreshToken: hashRefreshToken,
+                }),
+
+                smsServices.sendSms(smsTemplate[smsTypeEnums.WELCOME](user.name), user.phone)
+            ])
+
 
             res.json({...tokenPair, user});
         } catch (e) {
@@ -60,7 +74,8 @@ module.exports = {
 
             const user = await userServices.findById(_user_id);
 
-            await emailServices.sendEmail(user.email, emailTypeEnums.LOGOUT, {userName: user.name })
+            await emailServices.sendEmail(user.email, emailTypeEnums.LOGOUT, {userName: user.name})
+            await smsServices.sendSms(smsTemplate[smsTypeEnums.LOGOUT](user.name), user.phone)
 
             res.sendStatus(204)
 
@@ -71,7 +86,7 @@ module.exports = {
 
     forgotPasswordController: async (req, res, next) => {
         try {
-            const {_id, email, name} = req.user
+            const {_id, email, name, phone} = req.user
 
             const actionToken = authServices.generateActionToken({email: email}, actionTokenTypeEnums.FORGOT_PASSWORD);
 
@@ -79,10 +94,16 @@ module.exports = {
 
             const generateLink = `${FRONTEND_URL}/forgot_password/?token=${actionToken}`
 
-            await emailServices.sendEmail(email, emailTypeEnums.FORGOT_PASS, {
-                url: generateLink,
-                userName: name
-            })
+            await Promise.allSettled([
+
+                emailServices.sendEmail(email, emailTypeEnums.FORGOT_PASS, {
+                    url: generateLink,
+                    userName: name
+                }),
+
+                smsServices.sendSms(smsTemplate[smsTypeEnums.FORGOT_PASS](name), phone )
+
+            ])
 
             res.json('ok');
         } catch (e) {

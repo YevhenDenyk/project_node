@@ -1,6 +1,7 @@
-const {userServices, authServices, emailServices} = require("../services");
+const {userServices, authServices, emailServices, smsServices} = require("../services");
 const {WELCOME} = require("../enums/email-action.enum");
-const {emailTypeEnums} = require("../enums");
+const {emailTypeEnums, smsTypeEnums} = require("../enums");
+const {smsTemplate} = require("../helper");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
@@ -50,11 +51,16 @@ module.exports = {
     deleteUser: async (req, res, next) => {
         try {
             const {userId} = req.params
-            const {name, email} = req.user
+            const {name, email, phone} = req.user
 
-            await userServices.findByIdAndDelete(userId)
+            await Promise.allSettled([
 
-            await emailServices.sendEmail(email, emailTypeEnums.DELETE_ACCOUNT, {name})
+                userServices.findByIdAndDelete(userId),
+
+                emailServices.sendEmail(email, emailTypeEnums.DELETE_ACCOUNT, {name}),
+
+                smsServices.sendSms(smsTemplate[smsTypeEnums.DELETE_ACCOUNT](name), phone),
+            ])
 
             res.sendStatus(204)
 
