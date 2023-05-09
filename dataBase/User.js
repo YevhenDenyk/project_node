@@ -7,6 +7,7 @@ const userSchema = new Schema({
     age: {type: Number, default: 18},
     password: {type: String, required: true},
     phone: {type:String, required:true},
+    avatar: String,
 }, {
     timestamps: true,
     toJSON: {virtuals: true},

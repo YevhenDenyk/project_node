@@ -5,7 +5,7 @@ const {commonValidator, userValidator} = require("../validators");
 const User = require('../dataBase/User')
 
 module.exports = {
-    getUserDynamically: (fieldName, from = 'body', dbField = fieldName) => async (req, res, next) => {
+     getUserDynamically: (fieldName, from = 'body', dbField = fieldName) => async (req, res, next) => {
         try {
             const fieldToSearch = req[from][fieldName];
 
