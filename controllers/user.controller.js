@@ -1,4 +1,4 @@
-const {userServices, authServices, emailServices, smsServices} = require("../services");
+const {userServices, authServices, emailServices, smsServices, s3Services} = require("../services");
 const {WELCOME} = require("../enums/email-action.enum");
 const {emailTypeEnums, smsTypeEnums} = require("../enums");
 const {smsTemplate} = require("../helper");
@@ -67,5 +67,18 @@ module.exports = {
         } catch (e) {
             next(e)
         }
-    }
+    },
+    avatarUser : async (req, res, next) => {
+            try {
+                const {user, files} = req;
+                console.log(files);
+                const sendData = await s3Services.uploadPublicFile(files.avatar, "user", user._id);
+
+                const updateUser = await userServices.findByIdAndUpdate(user._id, {avatar:sendData.Location});
+
+                res.json(updateUser);
+            } catch (e) {
+                next(e);
+            }
+      },
 }
