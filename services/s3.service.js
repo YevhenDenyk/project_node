@@ -26,14 +26,14 @@ async function updatePublicFile(uploadPath, updateFile) {
         ACL: "public-read",
         Key: uploadPath.split(S3_BUCKET_URL).pop(),
         Body: updateFile.data,
-    })
+    }).promise()
 }
 
 async function deletePublicFile(uploadPath) {
     return s3Bucket.deleteObject({
         Bucket: S3_BUCKET_NAME,
         Key: uploadPath.split(S3_BUCKET_URL).pop(),
-    })
+    }).promise()
 }
 
 function buildFileName(fileName, itemType, itemId) {

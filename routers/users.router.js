@@ -55,6 +55,7 @@ router.put(
     userMiddleware.checkIsIdValid,
     // authMiddleware.checkAccessToken,
     userMiddleware.getUserDynamically("userId", "params", "_id"),
+    userMiddleware.checkIsAvatarExist,
     userController.updateAvatar
 );
 
@@ -63,6 +64,7 @@ router.delete(
     userMiddleware.checkIsIdValid,
     // authMiddleware.checkAccessToken,
     userMiddleware.getUserDynamically("userId", "params", "_id"),
+    userMiddleware.checkIsAvatarExist,
     userController.deleteAvatar
 );
 

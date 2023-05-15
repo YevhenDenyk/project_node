@@ -20,7 +20,7 @@ module.exports = {
             next(e)
         }
     },
-    getUserDynamically: (fieldName, from='body', dbField= fieldName)=>async (req, res, next) => {
+    getUserDynamically: (fieldName, from = 'body', dbField = fieldName) => async (req, res, next) => {
         try {
             const fieldToSearch = req[from][fieldName];
 
@@ -70,7 +70,7 @@ module.exports = {
             next(e)
         }
     },
-    checkIsEmailExist:async (req, res, next) => {
+    checkIsEmailExist: async (req, res, next) => {
         try {
             const {email} = req.newUser
 
@@ -96,6 +96,18 @@ module.exports = {
             next()
         } catch (e) {
             next(e)
+        }
+    },
+    checkIsAvatarExist: async (req, res, next) => {
+        try {
+
+            if (!req.user.avatar) {
+                throw new ApiError(`User ${req.user.name} didn't have avatar`, 400)
+            }
+
+            next();
+        } catch (e) {
+            next(e);
         }
     },
 }

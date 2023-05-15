@@ -4,7 +4,6 @@ const {emailTypeEnums, smsTypeEnums} = require("../enums");
 const {smsTemplate} = require("../helper");
 const {userRepository} = require("../repositories");
 const {userPresenter} = require("../presenters");
-const ApiError = require("../errors/ApiError");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
@@ -88,9 +87,6 @@ module.exports = {
     },
     updateAvatar: async (req, res, next) => {
         try {
-            if (!req.user.avatar){
-                throw new ApiError (`User ${req.user.name} didn't have avatar`, 400)
-            }
 
             await s3Services.updatePublicFile(req.user.avatar, req.files.avatar);
 
@@ -102,7 +98,7 @@ module.exports = {
     deleteAvatar: async (req, res, next) => {
         try {
             await s3Services.deletePublicFile(req.user.avatar)
-            await userServices.findByIdAndUpdate(req.user._id, {avatar: null})
+            await userServices.findByIdAndUpdate(req.user._id, {avatar: ''})
 
             res.sendStatus(204);
         } catch (e) {
