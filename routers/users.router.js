@@ -50,5 +50,19 @@ router.patch(
     usersController.uploadAvatar
 );
 
+router.delete(
+    '/:userID/avatar',
+    userMiddleware.isUserIdValid,
+    // authMiddleware.checkAccessToken,
+    userMiddleware.getUserDynamically('userID','params', '_id'),
+    usersController.deleteAvatar
+);
+router.put(
+    '/:userID/avatar',
+    userMiddleware.isUserIdValid,
+    // authMiddleware.checkAccessToken,
+    userMiddleware.getUserDynamically('userID','params', '_id'),
+    usersController.updateAvatar
+);
 
 module.exports = router

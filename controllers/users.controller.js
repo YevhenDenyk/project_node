@@ -1,12 +1,16 @@
 const {userService, emailService, smsService, s3Service} = require("../services");
 const {smsTypeEnum, emailActionsEnum} = require("../enums");
 const {smsTemplate} = require("../helper");
+const {usersRepository} = require("../repositories");
+const {usersPresenter} = require("../presenters");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
         try {
-            const users = await userService.findByParams();
-            res.json(users);
+            const data = await usersRepository.find(req.query);
+
+            data.users = usersPresenter.normalizeUsers(data.users);
+            res.json(data);
         } catch (e) {
             next(e);
         }
@@ -69,8 +73,8 @@ module.exports = {
             const ext = path.extname(req.files.avatar.name);
             const uploadPath = path.join(process.cwd(), "static", `${Date.now()}${ext}`);
 
-            req.files.avatar.mv(uploadPath, (err)=>{
-                if (err){
+            req.files.avatar.mv(uploadPath, (err) => {
+                if (err) {
                     throw err
                 }
             })
@@ -81,6 +85,26 @@ module.exports = {
             const updatedUser = await userService.updateOne(req.user._id, {avatar: uploadData.Location});
 
             res.json(updatedUser);
+        } catch (e) {
+            next(e);
+        }
+    },
+    deleteAvatar: async (req, res, next) => {
+        try {
+
+            await s3Service.deletePublicFile(req.user.avatar);
+            await  userService.updateOne(req.user._id, {avatar: ''})
+
+            res.sendStatus(204);
+        } catch (e) {
+            next(e);
+        }
+    },
+    updateAvatar: async (req, res, next) => {
+        try {
+            await s3Service.updatePublicFile(req.user.avatar, req.files.avatar)
+
+            res.json('ok');
         } catch (e) {
             next(e);
         }
