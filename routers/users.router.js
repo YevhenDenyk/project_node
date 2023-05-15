@@ -47,7 +47,23 @@ router.patch(
     userMiddleware.checkIsIdValid,
     // authMiddleware.checkAccessToken,
     userMiddleware.getUserDynamically("userId", "params", "_id"),
-    userController.avatarUser
-)
+    userController.uploadAvatar
+);
+router.put(
+    '/:userId/avatar',
+    fileMiddleware.checkUploadImage,
+    userMiddleware.checkIsIdValid,
+    // authMiddleware.checkAccessToken,
+    userMiddleware.getUserDynamically("userId", "params", "_id"),
+    userController.updateAvatar
+);
+
+router.delete(
+    '/:userId/avatar',
+    userMiddleware.checkIsIdValid,
+    // authMiddleware.checkAccessToken,
+    userMiddleware.getUserDynamically("userId", "params", "_id"),
+    userController.deleteAvatar
+);
 
 module.exports = router

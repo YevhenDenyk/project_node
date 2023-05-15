@@ -2,13 +2,18 @@ const {userServices, authServices, emailServices, smsServices, s3Services} = req
 const {WELCOME} = require("../enums/email-action.enum");
 const {emailTypeEnums, smsTypeEnums} = require("../enums");
 const {smsTemplate} = require("../helper");
+const {userRepository} = require("../repositories");
+const {userPresenter} = require("../presenters");
+const ApiError = require("../errors/ApiError");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
         try {
-            const users = await userServices.findByParams();
+            const data = await userRepository.find(req.query)
 
-            res.json(users);
+            data.users = userPresenter.normalizeUsers(data.users)
+
+            res.json(data);
         } catch (e) {
             next(e)
         }
@@ -68,17 +73,40 @@ module.exports = {
             next(e)
         }
     },
-    avatarUser : async (req, res, next) => {
-            try {
-                const {user, files} = req;
-                console.log(files);
-                const sendData = await s3Services.uploadPublicFile(files.avatar, "user", user._id);
+    uploadAvatar: async (req, res, next) => {
+        try {
+            const {user, files} = req;
 
-                const updateUser = await userServices.findByIdAndUpdate(user._id, {avatar:sendData.Location});
+            const sendData = await s3Services.uploadPublicFile(files.avatar, "user", user._id);
 
-                res.json(updateUser);
-            } catch (e) {
-                next(e);
+            const updateUser = await userServices.findByIdAndUpdate(user._id, {avatar: sendData.Location});
+
+            res.json(updateUser);
+        } catch (e) {
+            next(e);
+        }
+    },
+    updateAvatar: async (req, res, next) => {
+        try {
+            if (!req.user.avatar){
+                throw new ApiError (`User ${req.user.name} didn't have avatar`, 400)
             }
-      },
+
+            await s3Services.updatePublicFile(req.user.avatar, req.files.avatar);
+
+            res.json('Successful');
+        } catch (e) {
+            next(e);
+        }
+    },
+    deleteAvatar: async (req, res, next) => {
+        try {
+            await s3Services.deletePublicFile(req.user.avatar)
+            await userServices.findByIdAndUpdate(req.user._id, {avatar: null})
+
+            res.sendStatus(204);
+        } catch (e) {
+            next(e);
+        }
+    },
 }
