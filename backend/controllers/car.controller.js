@@ -16,8 +16,6 @@ module.exports = {
         try {
             const car = await carServices.create(req.body)
 
-            await emailServices.sendEmail('denyk.yevhen@gmail.com',CREATE_CAR, car)
-
             res.status(201).json(car);
         } catch (e) {
             next(e)

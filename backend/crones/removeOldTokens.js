@@ -7,8 +7,8 @@ const {authServices} = require('../services');
 dayjs.extend(utc);
 
 module.exports = new CronJob(
-    // '* 0 4 */1 * *',
-    '10 * * * * *',
+    '* 0 4 */1 * *',
+    // '10 * * * * *',
     async function () {
         try {
             console.log('Start remove old tokens');

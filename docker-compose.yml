@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    restart: on-failure
+    command:
+      sh -c "npm start"
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+
+  db:
+    image: mongo
+    volumes:
+      - ./mongo_db:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - "27017:27017"
+
+  web:
+    image: nginx:alpine
+    volumes:
+      - ./client:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    restart: on-failure
+#    env_file:
+#      - .env
+    ports:
+      - "80:80"
